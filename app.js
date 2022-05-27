@@ -9,8 +9,10 @@ const knex = require("knex")(options);
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/user");
-var dataRouter = require("./routes/data");
 var adminRouter = require("./routes/admin");
+var countriesRouter = require("./routes/countries");
+var volcanoRouter = require("./routes/volcano");
+var volcanoesRouter = require("./routes/volcanoes");
 
 var app = express();
 
@@ -24,16 +26,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/", dataRouter);
-app.use("/", adminRouter);
-
-app.use("/user", usersRouter);
-
 app.use((req, res, next) => {
   req.db = knex;
   next();
 });
+
+app.use("/", indexRouter);
+app.use("/", adminRouter);
+app.use("/", countriesRouter);
+app.use("/", volcanoRouter);
+app.use("/", volcanoesRouter);
+app.use("/user", usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
