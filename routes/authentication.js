@@ -2,6 +2,8 @@ var express = require("express");
 var router = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const secretKey = "SUPER SECRET KEY DO NOT STEAL";
+
 /* GET users listing. */
 
 router.post("/register", function (req, res, next) {
@@ -40,7 +42,51 @@ router.post("/register", function (req, res, next) {
 });
 
 router.post("/login", function (req, res, next) {
-  res.send("DIS LOGIN AUTHENTICATION ");
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!email || !password) {
+    res.status(400).json({
+      Error: true,
+      Message: "Request body incomplete, both email and password are required",
+    });
+    return;
+  }
+
+  const queryUsers = req.db
+    .from("users")
+    .select("*")
+    .where("email", "=", email);
+
+  queryUsers.then((users) => {
+    if (users.length === 0) {
+      res.status(401).json({
+        error: true,
+        message: "Incorrect email or password",
+      });
+      return;
+    }
+
+    const { hash } = users[0];
+
+    if (!bcrypt.compareSync(password, hash)) {
+      res.status(401).json({
+        error: true,
+        Message: "Incorrect email or password",
+      });
+      return;
+    }
+
+    const expires_in = 60 * 60 * 24;
+    const exp = Date.now() + expires_in * 1000;
+    const token = jwt.sign({ email, exp }, secretKey);
+
+    res.status(200).json({
+      token,
+      token_type: "Bearer",
+      expires_in,
+    });
+  });
 });
 
 module.exports = router;
