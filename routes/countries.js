@@ -6,7 +6,9 @@ router.get("/countries", function (req, res, next) {
   req.db
     .from("data")
     .select("country")
+    .distinct("country")
     .orderBy("country")
+    .pluck("country")
     .then((rows) => {
       res.json(rows);
     })
