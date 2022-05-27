@@ -8,7 +8,7 @@ const options = require("./knexfile.js");
 const knex = require("knex")(options);
 
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/user");
+var authRouter = require("./routes/authentication");
 var adminRouter = require("./routes/admin");
 var countriesRouter = require("./routes/countries");
 var volcanoRouter = require("./routes/volcano");
@@ -36,7 +36,7 @@ app.use("/", adminRouter);
 app.use("/", countriesRouter);
 app.use("/", volcanoRouter);
 app.use("/", volcanoesRouter);
-app.use("/user", usersRouter);
+app.use("/user", authRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

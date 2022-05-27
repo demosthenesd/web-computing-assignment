@@ -6,12 +6,11 @@ router.get("/", function (req, res, next) {
   res.send("respond with a resource");
 });
 
-router.get("/register", function (req, res, next) {
+router.get("/:email/profile", function (req, res, next) {
   res.send("DIS REGISTER");
 });
 
-router.get("/login", function (req, res, next) {
-  res.send("DIS LOGIN ");
+router.get("/:email/profile", function (req, res, next) {
+  res.send("DIS REGISTER");
 });
-
 module.exports = router;
