@@ -17,7 +17,6 @@ router.get("/:email/profile", function (req, res, next) {
       });
       return;
     }
-
     res.json(users);
   });
 });
