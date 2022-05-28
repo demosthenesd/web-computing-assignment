@@ -3,23 +3,30 @@ var router = express.Router();
 
 router.get("/volcanoes", function (req, res, next) {
   const country = req.query.country;
-  const pop = req.query.populatedWithin; // 5
+  const pop = req.query.populatedWithin;
+
+  if (!country) {
+    res.status(400).json({
+      error: true,
+      message: "Country is a required query parameter.",
+    });
+    return;
+  }
 
   let query = req.db.from("data").select("*").where("country", "=", country);
 
   if (pop) {
     query = query.where(`population_${pop}`, ">", 0);
   }
+
   query
     .then((rows) => {
       res.json(rows);
     })
     .catch((err) => {
-      console.log(err);
-      res.json({
-        Error: true,
-        Message:
-          "Invalid query parameters. Query parameters are not permitted.",
+      res.status(400).json({
+        error: true,
+        message: "Country is a required query parameter.",
       });
     });
 });

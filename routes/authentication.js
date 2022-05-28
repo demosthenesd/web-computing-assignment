@@ -47,8 +47,8 @@ router.post("/login", function (req, res, next) {
 
   if (!email || !password) {
     res.status(400).json({
-      Error: true,
-      Message: "Request body incomplete, both email and password are required",
+      error: true,
+      message: "Request body incomplete, both email and password are required",
     });
     return;
   }
@@ -72,7 +72,7 @@ router.post("/login", function (req, res, next) {
     if (!bcrypt.compareSync(password, hash)) {
       res.status(401).json({
         error: true,
-        Message: "Incorrect email or password",
+        message: "Incorrect email or password",
       });
       return;
     }

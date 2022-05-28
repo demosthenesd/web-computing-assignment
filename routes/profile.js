@@ -6,14 +6,14 @@ var router = express.Router();
 router.get("/:email/profile", function (req, res, next) {
   const queryUsers = req.db
     .from("users")
-    .select("*")
+    .select("email", "firstName", "lastName")
     .where("email", "=", req.params.email);
 
   queryUsers.then((users) => {
     if (users.length === 0) {
-      res.status(401).json({
+      res.status(404).json({
         error: true,
-        message: "Incorrect email or password",
+        message: "User not found",
       });
       return;
     }
