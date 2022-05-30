@@ -6,27 +6,27 @@ var query;
 const authorize = function (req, res, next) {
   const auth = req.headers.authorization;
 
-  query = req.db
-    .from("data")
-    .select(
-      "id",
-      "name",
-      "country",
-      "region",
-      "subregion",
-      "last_eruption",
-      "summit",
-      "elevation",
-      "latitude",
-      "longitude"
-    )
-    .where("id", "=", req.params.id);
-
   if (auth) {
     query = req.db.from("data").select("*").where("id", "=", req.params.id);
+  } else if (!auth) {
+    query = req.db
+      .from("data")
+      .select(
+        "id",
+        "name",
+        "country",
+        "region",
+        "subregion",
+        "last_eruption",
+        "summit",
+        "elevation",
+        "latitude",
+        "longitude"
+      )
+      .where("id", "=", req.params.id);
   }
 
-  if (!auth || auth.split(" ").length !== 2) {
+  if (auth && auth.split(" ").length !== 2) {
     res.status(401).json({
       Error: true,
       Message: "Invalid JWT token",
