@@ -55,7 +55,7 @@ router.get("/volcano/:id", authorize, function (req, res, next) {
         return;
       }
 
-      res.json(rows);
+      res.json(rows[0]);
     })
     .catch((err) => {
       console.log(err);
