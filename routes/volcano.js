@@ -1,14 +1,24 @@
 var express = require("express");
 var router = express.Router();
 
+var auth = require("../authorize");
+
 var query;
 
-const authorize = function (req, res, next) {
-  const auth = req.headers.authorization;
+router.get("/volcano/:id", auth, function (req, res, next) {
+  if (isNaN(req.params.id)) {
+    res.status(404).json({
+      error: true,
+      message: `Volcano with ID: ${req.params.id} not found.`,
+    });
+    return;
+  }
 
-  if (auth) {
+  console.log(req.checkAuth);
+
+  if (req.checkAuth) {
     query = req.db.from("data").select("*").where("id", "=", req.params.id);
-  } else if (!auth) {
+  } else {
     query = req.db
       .from("data")
       .select(
@@ -24,25 +34,6 @@ const authorize = function (req, res, next) {
         "longitude"
       )
       .where("id", "=", req.params.id);
-  }
-
-  if (auth && auth.split(" ").length !== 2) {
-    res.status(401).json({
-      Error: true,
-      Message: "Invalid JWT token",
-    });
-    return;
-  }
-
-  next();
-};
-router.get("/volcano/:id", authorize, function (req, res, next) {
-  if (isNaN(req.params.id)) {
-    res.status(404).json({
-      error: true,
-      message: `Volcano with ID: ${req.params.id} not found.`,
-    });
-    return;
   }
 
   query
