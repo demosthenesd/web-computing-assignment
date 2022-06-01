@@ -14,8 +14,6 @@ router.get("/volcano/:id", auth, function (req, res, next) {
     return;
   }
 
-  console.log(req.checkAuth);
-
   if (req.checkAuth) {
     query = req.db.from("data").select("*").where("id", "=", req.params.id);
   } else {
@@ -49,10 +47,9 @@ router.get("/volcano/:id", auth, function (req, res, next) {
       res.json(rows[0]);
     })
     .catch((err) => {
-      console.log(err);
-      res.json({
-        Error: true,
-        Message:
+      res.status(400).json({
+        error: true,
+        message:
           "Invalid query parameters. Query parameters are not permitted.",
       });
     });
