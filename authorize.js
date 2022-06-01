@@ -12,10 +12,12 @@ const authorize = function (req, res, next) {
 
   if (!auth) {
     req.checkAuth = false;
-  } else if (auth && auth.split(" ").length !== 2) {
+  }
+  //check if JWT is malformed
+  else if (auth && auth.split(" ").length !== 2) {
     res.status(401).json({
       error: true,
-      message: "Invalid JWT token",
+      message: "Authorization header is malformed",
     });
     req.checkAuth = false;
     return;
@@ -23,9 +25,22 @@ const authorize = function (req, res, next) {
 
   if (auth && auth.split(" ")[1]) {
     token = auth.split(" ")[1];
-    const decoded = jwt.verify(token, secretKey);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, secretKey);
+    } catch (error) {
+      res.status(401).json({
+        error: true,
+        message: "Invalid JWT token",
+      });
+    }
     if (decoded) {
       req.checkAuth = true;
+    } else {
+      res.status(401).json({
+        error: true,
+        message: "Invalid JWT token",
+      });
     }
   }
 

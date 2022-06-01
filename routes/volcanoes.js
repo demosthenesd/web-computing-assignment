@@ -2,8 +2,9 @@ var express = require("express");
 var router = express.Router();
 
 router.get("/volcanoes", function (req, res, next) {
-  const country = req.query.country;
-  const pop = req.query.populatedWithin;
+  const { country, populatedWithin, ...others } = req.query;
+  // const country = req.query.country;
+  // const populatedWithin = req.query.populatedWithin;
 
   if (!country) {
     res.status(400).json({
@@ -13,10 +14,17 @@ router.get("/volcanoes", function (req, res, next) {
     return;
   }
 
-  let query = req.db.from("data").select("*").where("country", "=", country);
+  if (Object.keys(others).length > 0) {
+    res.status(400).json({
+      error: true,
+      message: "Bad Request",
+    });
+    return;
+  }
 
-  if (pop) {
-    query = query.where(`population_${pop}`, ">", 0);
+  let query = req.db.from("data").select("*").where("country", "=", country);
+  if (populatedWithin) {
+    query = query.where(`population_${populatedWithin}`, ">", 0);
   }
 
   query

@@ -1,13 +1,24 @@
 var express = require("express");
 var router = express.Router();
+var auth = require("../authorize");
 
 /* GET users listing. */
 
-router.get("/:email/profile", function (req, res, next) {
-  const queryUsers = req.db
-    .from("users")
-    .select("email", "firstName", "lastName")
-    .where("email", "=", req.params.email);
+var queryUsers;
+
+router.get("/:email/profile", auth, function (req, res, next) {
+  if (!req.checkAuth) {
+    queryUsers = req.db
+      .from("users")
+      .select("email", "firstName", "lastName")
+      .where("email", "=", req.params.email);
+  } else {
+    queryUsers = req.db
+      .from("users")
+      .select("email", "firstName", "lastName", "dob", "address")
+      .where("email", "=", req.params.email);
+  }
+  console.log(req.params.email);
 
   queryUsers.then((users) => {
     if (users.length === 0) {
@@ -17,11 +28,9 @@ router.get("/:email/profile", function (req, res, next) {
       });
       return;
     }
-    res.json(users);
+    res.json(users[0]);
   });
 });
 
-router.put("/:email/profile", function (req, res, next) {
-  res.send("DIS REGISTER");
-});
+router.put("/:email/profile", function (req, res, next) {});
 module.exports = router;
