@@ -25,16 +25,16 @@ const authorize = function (req, res, next) {
 
   if (auth && auth.split(" ")[1]) {
     token = auth.split(" ")[1];
-    let decoded;
     try {
-      decoded = jwt.verify(token, secretKey);
+      req.decoded = jwt.verify(token, secretKey);
     } catch (error) {
       res.status(401).json({
         error: true,
         message: "Invalid JWT token",
       });
+      return;
     }
-    if (decoded) {
+    if (req.decoded) {
       req.checkAuth = true;
     } else {
       res.status(401).json({

@@ -18,7 +18,6 @@ router.get("/:email/profile", auth, function (req, res, next) {
       .select("email", "firstName", "lastName", "dob", "address")
       .where("email", "=", req.params.email);
   }
-  console.log(req.params.email);
 
   queryUsers.then((users) => {
     if (users.length === 0) {
@@ -32,5 +31,49 @@ router.get("/:email/profile", auth, function (req, res, next) {
   });
 });
 
-router.put("/:email/profile", function (req, res, next) {});
+router.put("/:email/profile", auth, function (req, res, next) {
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const dob = req.body.dob;
+  const address = req.body.address;
+
+  console.log(req.decoded.email);
+
+  if (!firstName || !lastName || !dob || !address) {
+    res.status(400).json({
+      error: true,
+      message:
+        "Request body incomplete: firstName, lastName, dob and address are required.",
+    });
+    return;
+  }
+
+  if (!req.checkAuth) {
+    res.status(401).json({
+      error: true,
+      message: "Authorization header ('Bearer token') not found",
+    });
+    return;
+  }
+  if (req.checkAuth && req.decoded.email !== req.params.email) {
+    res.status(403).json({
+      error: true,
+      message: "Forbidden",
+    });
+    return;
+  }
+
+  const query = req.db
+    .from("users")
+    .update(
+      { firstName: firstName },
+      { lastName: lastName },
+      { dob: dob },
+      { address: address }
+    )
+    .where({ email: req.params.email });
+
+  query.then(() => res.status(200).json({ firstName, lastName, dob, address }));
+});
+
 module.exports = router;
