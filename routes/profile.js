@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var auth = require("../authorize");
-const { DateTime } = require("luxon");
+var moment = require("moment");
 
 /* GET users listing. */
 
@@ -38,12 +38,12 @@ router.get("/:email/profile", auth, function (req, res, next) {
 router.put("/:email/profile", auth, function (req, res, next) {
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
-  const dobToDate = new Date(req.body.dob);
-  const month = dobToDate.getMonth();
-  const year = dobToDate.getFullYear();
-  const day = dobToDate.getDate();
-  const dob = req.body.dob;
-  const currentDate = new Date();
+
+  let dob = moment(req.body.dob, "YYYY-MM-DD", true);
+  const now = moment();
+
+  console.log(dob);
+
   const address = req.body.address;
 
   if (!req.checkAuth) {
@@ -83,13 +83,22 @@ router.put("/:email/profile", auth, function (req, res, next) {
     return;
   }
 
-  if (dobToDate > currentDate) {
+  if (dob > now) {
     res.status(400).json({
       error: true,
       message: "Invalid input: dob must be a date in the past.",
     });
     return;
-  } else if (!dateFormat.test(dob)) {
+  } else if (!dob.isValid()) {
+    res.status(400).json({
+      error: true,
+      message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
+    });
+    return;
+  }
+
+  dob = dob.format("YYYY-MM-DD");
+  if (!dateFormat.test(dob)) {
     res.status(400).json({
       error: true,
       message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
