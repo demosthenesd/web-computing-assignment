@@ -7,7 +7,10 @@ var auth = require("../authorize");
 var queryUsers;
 
 router.get("/:email/profile", auth, function (req, res, next) {
-  if (!req.checkAuth) {
+  if (
+    !req.checkAuth ||
+    (req.checkAuth && req.params.email !== req.decoded.email)
+  ) {
     queryUsers = req.db
       .from("users")
       .select("email", "firstName", "lastName")
@@ -84,11 +87,12 @@ router.put("/:email/profile", auth, function (req, res, next) {
     )
     .where({ email: req.params.email });
 
-  query.then(() =>
-    res
-      .status(200)
-      .json({ email: req.body.email, firstName, lastName, dob, address })
-  );
+  if (req.checkAuth)
+    query.then(() =>
+      res
+        .status(200)
+        .json({ email: req.body.email, firstName, lastName, dob, address })
+    );
 });
 
 module.exports = router;
