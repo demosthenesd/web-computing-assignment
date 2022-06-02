@@ -41,7 +41,7 @@ router.put("/:email/profile", auth, function (req, res, next) {
   const address = req.body.address;
 
   let lettersOnly = /^[A-Za-z]+$/;
-  let emailFormat = /^[^@]+@[^@]+\.[^@]+$/;
+  let dateFormat = /^\d{4}-\d{2}-\d{2}$/;
 
   if (!firstName || !lastName || !dob || !address) {
     res.status(400).json({
@@ -61,7 +61,14 @@ router.put("/:email/profile", auth, function (req, res, next) {
         "Request body invalid: firstName, lastName and address must be strings only.",
     });
     return;
+  } else if (!dob.isValid()) {
+    res.status(400).json({
+      error: true,
+      message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
+    });
+    return;
   }
+
   if (!req.checkAuth) {
     res.status(401).json({
       error: true,
