@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var auth = require("../authorize");
+const { DateTime } = require("luxon");
 
 /* GET users listing. */
 
@@ -37,8 +38,30 @@ router.get("/:email/profile", auth, function (req, res, next) {
 router.put("/:email/profile", auth, function (req, res, next) {
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
-  const dob = req.body.dob;
+  const dobToDate = new Date(req.body.dob);
+  const month = dobToDate.getMonth();
+  const year = dobToDate.getFullYear();
+  const day = dobToDate.getDate();
+  const dob = year + "-" + month + "-" + day;
+  const currentDate = new Date();
   const address = req.body.address;
+
+  console.log(dob);
+  console.log(currentDate);
+
+  if (!req.checkAuth) {
+    res.status(401).json({
+      error: true,
+      message: "Authorization header ('Bearer token') not found",
+    });
+    return;
+  } else if (req.checkAuth && req.decoded.email !== req.params.email) {
+    res.status(403).json({
+      error: true,
+      message: "Forbidden",
+    });
+    return;
+  }
 
   let lettersOnly = /^[A-Za-z]+$/;
   let dateFormat = /^\d{4}-\d{2}-\d{2}$/;
@@ -61,25 +84,18 @@ router.put("/:email/profile", auth, function (req, res, next) {
         "Request body invalid: firstName, lastName and address must be strings only.",
     });
     return;
-  } else if (!dob.isValid()) {
+  }
+
+  if (dobToDate > currentDate) {
+    res.status(400).json({
+      error: true,
+      message: "Invalid input: dob must be a date in the past.",
+    });
+    return;
+  } else if (!dateFormat.test(dob)) {
     res.status(400).json({
       error: true,
       message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
-    });
-    return;
-  }
-
-  if (!req.checkAuth) {
-    res.status(401).json({
-      error: true,
-      message: "Authorization header ('Bearer token') not found",
-    });
-    return;
-  }
-  if (req.checkAuth && req.decoded.email !== req.params.email) {
-    res.status(403).json({
-      error: true,
-      message: "Forbidden",
     });
     return;
   }
