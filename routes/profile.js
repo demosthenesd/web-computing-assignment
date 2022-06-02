@@ -42,12 +42,9 @@ router.put("/:email/profile", auth, function (req, res, next) {
   const month = dobToDate.getMonth();
   const year = dobToDate.getFullYear();
   const day = dobToDate.getDate();
-  const dob = year + "-" + month + "-" + day;
+  const dob = req.body.dob;
   const currentDate = new Date();
   const address = req.body.address;
-
-  console.log(dob);
-  console.log(currentDate);
 
   if (!req.checkAuth) {
     res.status(401).json({
@@ -64,7 +61,7 @@ router.put("/:email/profile", auth, function (req, res, next) {
   }
 
   let lettersOnly = /^[A-Za-z]+$/;
-  let dateFormat = /^\d{4}-\d{2}-\d{2}$/;
+  let dateFormat = /^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$/;
 
   if (!firstName || !lastName || !dob || !address) {
     res.status(400).json({
@@ -114,7 +111,7 @@ router.put("/:email/profile", auth, function (req, res, next) {
     query.then(() =>
       res
         .status(200)
-        .json({ email: req.body.email, firstName, lastName, dob, address })
+        .json({ email: req.params.email, firstName, lastName, dob, address })
     );
 });
 
