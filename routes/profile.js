@@ -103,6 +103,8 @@ router.put("/:email/profile", auth, function (req, res, next) {
     return;
   }
 
+  console.log(dobISOFormat);
+
   const query = req.db
     .from("users")
     .update({
