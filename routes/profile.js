@@ -80,8 +80,8 @@ router.put("/:email/profile", auth, function (req, res, next) {
     });
     return;
   }
-  dob = dob.format("YYYY-MM-DD");
-  if (!dateFormat.test(dob)) {
+  dobISOFormat = dob.format("YYYY-MM-DD");
+  if (!dateFormat.test(dobISOFormat)) {
     res.status(400).json({
       error: true,
       message: "Invalid input: dob must be a real date in format YYYY-MM-DD.",
@@ -108,22 +108,20 @@ router.put("/:email/profile", auth, function (req, res, next) {
     .update({
       firstName: firstName,
       lastName: lastName,
-      dob: dob,
+      dob: dobISOFormat,
       address: address,
     })
     .where({ email: req.decoded.email });
 
   if (req.checkAuth) {
     query.then(() =>
-      res
-        .status(200)
-        .json({ email: req.params.email, firstName, lastName, dob, address })
-    );
-  } else if (req.decoded.email === req.params.email) {
-    query.then(() =>
-      res
-        .status(200)
-        .json({ email: req.params.email, firstName, lastName, dob, address })
+      res.status(200).json({
+        email: req.params.email,
+        firstName,
+        lastName,
+        dob: dobISOFormat,
+        address,
+      })
     );
   }
 });
