@@ -39,29 +39,12 @@ router.put("/:email/profile", auth, function (req, res, next) {
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
 
-  let dob = moment(req.body.dob, "YYYY-MM-DD", true);
-  const now = moment();
-
-  console.log(dob);
-
   const address = req.body.address;
+  const now = moment();
+  let dob = moment(req.body.dob, "YYYY-MM-DD", true);
 
-  if (!req.checkAuth) {
-    res.status(401).json({
-      error: true,
-      message: "Authorization header ('Bearer token') not found",
-    });
-    return;
-  } else if (req.checkAuth && req.decoded.email !== req.params.email) {
-    res.status(403).json({
-      error: true,
-      message: "Forbidden",
-    });
-    return;
-  }
-
-  let lettersOnly = /^[A-Za-z]+$/;
-  let dateFormat = /^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$/;
+  const lettersOnly = /^[A-Za-z]+$/;
+  const dateFormat = /^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$/;
 
   if (!firstName || !lastName || !dob || !address) {
     res.status(400).json({
@@ -96,7 +79,6 @@ router.put("/:email/profile", auth, function (req, res, next) {
     });
     return;
   }
-
   dob = dob.format("YYYY-MM-DD");
   if (!dateFormat.test(dob)) {
     res.status(400).json({
@@ -106,7 +88,22 @@ router.put("/:email/profile", auth, function (req, res, next) {
     return;
   }
 
+  if (!req.checkAuth) {
+    res.status(401).json({
+      error: true,
+      message: "Authorization header ('Bearer token') not found",
+    });
+    return;
+  } else if (req.checkAuth && req.decoded.email !== req.params.email) {
+    res.status(403).json({
+      error: true,
+      message: "Forbidden",
+    });
+    return;
+  }
+
   const query = req.db
+    .select("*")
     .from("users")
     .update(
       { firstName: firstName },
@@ -114,14 +111,21 @@ router.put("/:email/profile", auth, function (req, res, next) {
       { dob: dob },
       { address: address }
     )
-    .where({ email: req.params.email });
+    .where({ email: req.decoded.email });
 
-  if (req.checkAuth)
+  if (req.checkAuth) {
     query.then(() =>
       res
         .status(200)
         .json({ email: req.params.email, firstName, lastName, dob, address })
     );
+  } else if (req.decoded.email === req.params.email) {
+    query.then(() =>
+      res
+        .status(200)
+        .json({ email: req.params.email, firstName, lastName, dob, address })
+    );
+  }
 });
 
 module.exports = router;
