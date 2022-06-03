@@ -31,6 +31,7 @@ router.get("/:email/profile", auth, function (req, res, next) {
       });
       return;
     }
+
     res.json(users[0]);
   });
 });
@@ -103,14 +104,13 @@ router.put("/:email/profile", auth, function (req, res, next) {
   }
 
   const query = req.db
-    .select("*")
     .from("users")
-    .update(
-      { firstName: firstName },
-      { lastName: lastName },
-      { dob: dob },
-      { address: address }
-    )
+    .update({
+      firstName: firstName,
+      lastName: lastName,
+      dob: dob,
+      address: address,
+    })
     .where({ email: req.decoded.email });
 
   if (req.checkAuth) {
